@@ -19,6 +19,7 @@ export interface MentorProfile {
   position?: string
   linkedinUrl?: string
   githubUrl?: string
+  websiteUrl?: string
   isFeatured: boolean
   isVerified: boolean
   avgRating?: number
