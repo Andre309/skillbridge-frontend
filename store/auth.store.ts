@@ -1,29 +1,35 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { User } from '@/types'
 
 interface AuthState {
-  user:         User | null
-  accessToken:  string | null
-  isLoading:    boolean
-  setAuth:      (user: User, token: string) => void
-  clearAuth:    () => void
-  setLoading:   (v: boolean) => void
+  user:        User | null
+  accessToken: string | null
+  isLoading:   boolean
+  setAuth:     (user: User, token: string) => void
+  clearAuth:   () => void
+  setLoading:  (v: boolean) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user:        null,
-  accessToken: typeof window !== 'undefined' ? localStorage.getItem('access_token') : null,
-  isLoading:   false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user:        null,
+      accessToken: null,
+      isLoading:   false,
 
-  setAuth: (user, accessToken) => {
-    if (typeof window !== 'undefined') localStorage.setItem('access_token', accessToken)
-    set({ user, accessToken })
-  },
+      setAuth: (user, accessToken) => set({ user, accessToken }),
 
-  clearAuth: () => {
-    if (typeof window !== 'undefined') localStorage.removeItem('access_token')
-    set({ user: null, accessToken: null })
-  },
+      clearAuth: () => set({ user: null, accessToken: null }),
 
-  setLoading: (isLoading) => set({ isLoading }),
-}))
+      setLoading: (isLoading) => set({ isLoading }),
+    }),
+    {
+      name:    'skillbridge_auth',   // ключ у localStorage
+      partialize: (state) => ({      // зберігаємо тільки потрібне
+        user:        state.user,
+        accessToken: state.accessToken,
+      }),
+    }
+  )
+)
